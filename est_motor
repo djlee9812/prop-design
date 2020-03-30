@@ -1,0 +1,7 @@
+Estimated Motor Model
+
+ 1     ! motor type (brushed DC)
+
+ 0.2      ! Rmotor (Ohms)
+ 0.5      ! Io     (Amps)
+ 20.0     ! Kv     (rpm/Volt)

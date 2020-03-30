@@ -1,0 +1,25 @@
+
+Template prop
+
+   2       ! Nblades
+
+   0.3500  6.2832    ! CL0    CL_a
+  -0.4000  1.3000    ! CLmin  CLmax
+
+   0.02000   0.008  0.006  0.30  ! CD0    CD2u   CD2l  CLCD0
+   100000.0 -0.500               ! REref  REexp
+
+
+   0.0  0.5  1.0   ! XIdes   (r/R locations where design cl is specified)
+   0.6  0.5  0.3   ! CLdes   (specified cl)
+
+  0.20    !  hub radius(m)
+  2.38    !  tip radius(m)
+  20.0    !  speed(m/s)
+  600.0  !  rpm
+
+  0.0      !  Thrust(N)   ( 0 if power  specified )
+    8000.0 !  Power(W)    ( 0 if thrust specified )
+
+ 0    0.0   ! Ldes   [ KQdes ]
+#  30       !  Nout     number of output stations (optional)
