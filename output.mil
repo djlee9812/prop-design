@@ -11,12 +11,12 @@ Template prop
 
 
    0.0  0.5  1.0   ! XIdes   (r/R locations where design cl is specified)
-   0.6  0.5  0.4   ! CLdes   (specified cl)
+   0.6  0.6  0.4   ! CLdes   (specified cl)
 
   0.15    !  hub radius(m)
   1.20    !  tip radius(m)
   41.0    !  speed(m/s)
-  801.7836315869753 ! rpm
+  808.2000783496356 ! rpm
 
   0.0      !  Thrust(N)   ( 0 if power  specified )
     1333.0 !  Power(W)    ( 0 if thrust specified )
