@@ -53,7 +53,6 @@ def plot_prop(propfile):
     r = []
     c = []
     beta = []
-    R = 1.3
     for i in range(1,P):
         line = prop_geom[i].split()
         # print(line)
@@ -64,22 +63,31 @@ def plot_prop(propfile):
     plt.subplot(211)
     plt.plot(r,c,'b')
     plt.ylabel("c/R")
-    plt.title("Propeller, R = 1.3m")
+    plt.title(r"Propeller Chord and $\beta$, R = " + str(R) + "m")
     plt.subplot(212)
     plt.plot(r, beta, 'b', label = "QMIL")
     plt.ylabel(r"$\beta$")
     plt.xlabel('r/R')
 
-    f1 = plt.figure()
+    hub_x = np.arange(0, .152, 0.002)
+    hub_y = np.sqrt(0.15**2 - hub_x**2)
+    hub_x = np.concatenate([hub_x, hub_x[::-1]])
+    hub_y = np.concatenate([hub_y, -hub_y[::-1]])
+    fig, ax = plt.subplots()
     c = np.array(c)
-    plt.plot(r, c/2)
-    plt.plot(r, -c/2)
+    prop_r = np.concatenate([r, r[::-1]])
+    prop_c = np.concatenate([c/2, -c[::-1]/2])
+    plt.plot(prop_r, prop_c, 'b', label="Flattened propeller")
+    plt.plot(hub_x, hub_y, 'r', label="Propeller hub")
+    # circle = plt.Circle((0, 0), 0.15, color='r')
     plt.xlim(0, 1)
     plt.ylim(-0.5, 0.5)
-    plt.title("Propeller, R = 1.3m")
+    plt.title("Propeller, R = " + str(R) + "m")
     plt.ylabel("x/R")
     plt.xlabel('y/R')
     plt.gca().set_aspect('equal', adjustable='box')
+    plt.legend()
+    # ax.add_artist(circle)
     plt.show()
 
 def opt_rpm():
@@ -95,6 +103,7 @@ def opt_rpm():
     else:
         print("Unsuccessful optimization", res.x, res.fun)
 
+R = 1.2
 opt_rpm()
 # plot_prop("best_prop")
 # rpms = np.arange(200.0, 1500.0, 50.0)
