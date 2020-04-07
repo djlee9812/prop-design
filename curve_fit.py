@@ -1,10 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.optimize import curve_fit
+from scipy.optimize import minize
 
-def fit_func(x, a, b, c, d):
-    h, v, T = x
-    return a*np.exp(b*h) + c*v**2 + d * T**2
+def fit_eff(x, A1, A2, h1, h2, v1, v2, T1, T2, dB1, dB2, c):
+    A, h, v, T, dB = x
+    return A1*A**A2 + h1*h**h2 + v1*v**v2 + T1*T**T2 + dB1*(dB)**dB2 + c
 
 data = np.load("opt_sweep.npz")
 areas = data['areas']
@@ -57,5 +57,7 @@ plt.xlabel(r"$d\beta$")
 plt.plot(dbetas, np.mean(ps, axis=(0,1,2,3)))
 
 plt.show()
+
+opt = minimize()
 
 # popt, pcov = curve_fit(fit_func, [hs, vs, ts], )

@@ -3,6 +3,11 @@ import numpy as np
 import re
 import matplotlib.pyplot as plt
 from scipy.optimize import minimize_scalar
+from air_data import change_air_data
+
+R = 1.2
+NUM_MOTOR = 6
+HUB_R = .15
 
 def get_num(line):
     """
@@ -21,9 +26,9 @@ def get_num(line):
         return 0
     return num
 
-def get_eff(rpm, out_file=""):
+def design_prop(rpm, out_file=""):
     """
-    Rewrites template qmil file and replaces desired rpm and returns
+    Rewrites template.qmil file to change desired rpm and returns
     efficiency of new designed prop
     If out_file is specified, that prop geometry is saved to the given filename
     """
@@ -44,6 +49,19 @@ def get_eff(rpm, out_file=""):
             eff = get_num(l)
     process.wait()
     return -eff
+
+def change_prop_area(area):
+    """
+    Change tip_radius in template.qmil using given total propulsive area and
+    scaled according to number of motors and hub diameter
+    """
+    tip_r = np.round(np.sqrt((area/NUM_MOTOR)/np.pi + HUB_R**2), 3)
+    with open('template.mil', 'r') as file:
+        data = file.readlines()
+    data[16] = "  " + str(tip_r) + "   ! tip radius(m)\n"
+    with open('template.mil', 'w') as file:
+        file.writelines(data)
+    design_opt_rpm()
 
 def plot_prop(propfile):
     f = open(propfile, "r")
@@ -69,8 +87,8 @@ def plot_prop(propfile):
     plt.ylabel(r"$\beta$")
     plt.xlabel('r/R')
 
-    hub_x = np.arange(0, .152, 0.002)
-    hub_y = np.sqrt(0.15**2 - hub_x**2)
+    hub_x = np.arange(0, .162, 0.002)
+    hub_y = np.sqrt(0.16**2 - hub_x**2)
     hub_x = np.concatenate([hub_x, hub_x[::-1]])
     hub_y = np.concatenate([hub_y, -hub_y[::-1]])
     fig, ax = plt.subplots()
@@ -90,30 +108,39 @@ def plot_prop(propfile):
     # ax.add_artist(circle)
     plt.show()
 
-def opt_rpm():
+def design_opt_rpm(h=22000):
     """
-    Optimize for efficiency on rpm given an airspeed
+    Design a propeller by optimizing for efficiency on rpm for flight conditions
+    given in template.mil and optional argument altitude
     """
-    res = minimize_scalar(get_eff, bounds=(200, 1500), method='bounded')
+    change_air_data(h)
+    res = minimize_scalar(design_prop, bounds=(400, 1600), method='bounded')
     if res.success:
-        get_eff(res.x, "best_prop")
-        print(-res.fun, res.x)
-        plot_prop("best_prop")
+        design_prop(res.x, "best_prop")
+        # print(-res.fun, res.x)
+        # plot_prop("best_prop")
         return res.x
     else:
         print("Unsuccessful optimization", res.x, res.fun)
 
-R = 1.2
-opt_rpm()
-# plot_prop("best_prop")
-# rpms = np.arange(200.0, 1500.0, 50.0)
-# etas = np.zeros(len(rpms))
-#
-# for i, rpm in enumerate(rpms):
-#     eff = get_eff(rpm)
-#     etas[i] = eff
-#
-# print(etas)
-# best_rpm_i = np.argmax(etas)
-# print(best_rpm_i, rpms[best_rpm_i], etas[best_rpm_i])
-# get_eff(rpms[best_rpm_i], "best_prop")
+if __name__ == "__main__":
+    design_opt_rpm(22000)
+    # change_prop_area(27)
+
+    # print(-design_prop(1200, "test_prop"))
+    # plot_prop('test_prop')
+
+    # rpms = np.arange(600.0, 2500.0, 100.0)
+    # etas = np.zeros(len(rpms))
+    #
+    # for i, rpm in enumerate(rpms):
+    #     eff = design_prop(rpm)
+    #     etas[i] = eff
+    # plt.plot(rpms, -etas)
+    # plt.xlabel("rpm")
+    # plt.ylabel(r"$\eta$")
+    # plt.show()
+
+    # best_rpm_i = np.argmax(etas)
+    # print(best_rpm_i, rpms[best_rpm_i], etas[best_rpm_i])
+    # design_prop(rpms[best_rpm_i], "best_prop")
