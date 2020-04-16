@@ -5,9 +5,9 @@ import matplotlib.pyplot as plt
 from scipy.optimize import minimize_scalar
 from air_data import change_air_data
 
-R = 1.2
+R = 1.14
 NUM_MOTOR = 6
-HUB_R = .15
+HUB_R = .16
 
 def get_num(line):
     """
@@ -26,7 +26,7 @@ def get_num(line):
         return 0
     return num
 
-def design_prop(rpm, out_file=""):
+def design_prop(rpm, out_file="temp_prop", traj_eval=False):
     """
     Rewrites template.qmil file to change desired rpm and returns
     efficiency of new designed prop
@@ -48,6 +48,15 @@ def design_prop(rpm, out_file=""):
         if "eff = " in l:
             eff = get_num(l)
     process.wait()
+    if traj_eval:
+        from trajectory import follow_trajectory
+        traj_data =  np.load('time_altitude_airspeed.npz')
+        ts = traj_data['t']/3600
+        hs = traj_data['h']
+        vs = traj_data['v']
+        thrusts = traj_data['thrust']/NUM_MOTOR
+        eff = follow_trajectory(ts, hs, vs, thrusts, optimize=True,
+                                prop="temp_prop", save=False)
     return -eff
 
 def change_prop_area(area):
@@ -87,14 +96,17 @@ def plot_prop(propfile):
     plt.ylabel(r"$\beta$")
     plt.xlabel('r/R')
 
-    hub_x = np.arange(0, .162, 0.002)
-    hub_y = np.sqrt(0.16**2 - hub_x**2)
+    radius = HUB_R / R
+    hub_x = np.arange(0, radius, 0.002)
+    hub_y = np.sqrt(radius**2 - hub_x**2)
     hub_x = np.concatenate([hub_x, hub_x[::-1]])
     hub_y = np.concatenate([hub_y, -hub_y[::-1]])
     fig, ax = plt.subplots()
     c = np.array(c)
     prop_r = np.concatenate([r, r[::-1]])
-    prop_c = np.concatenate([c/2, -c[::-1]/2])
+    prop_c = np.concatenate([c/4, -3*c[::-1]/4])
+    prop_c += np.mean(c)/4
+    print("Avg chord:", np.mean(c))
     plt.plot(prop_r, prop_c, 'b', label="Flattened propeller")
     plt.plot(hub_x, hub_y, 'r', label="Propeller hub")
     # circle = plt.Circle((0, 0), 0.15, color='r')
@@ -108,27 +120,31 @@ def plot_prop(propfile):
     # ax.add_artist(circle)
     plt.show()
 
-def design_opt_rpm(h=22000):
+def design_opt_rpm(h=21000, plot=False, traj=False):
     """
     Design a propeller by optimizing for efficiency on rpm for flight conditions
     given in template.mil and optional argument altitude
     """
     change_air_data(h)
-    res = minimize_scalar(design_prop, bounds=(400, 1600), method='bounded')
+    res = minimize_scalar(design_prop, bounds=(900, 1600), method='bounded',
+                          args=("temp_prop", traj), options={'xatol': 2})
     if res.success:
         design_prop(res.x, "best_prop")
-        # print(-res.fun, res.x)
-        # plot_prop("best_prop")
+        if plot:
+            print(-res.fun, res.x)
+            plot_prop("best_prop")
         return res.x
     else:
         print("Unsuccessful optimization", res.x, res.fun)
 
 if __name__ == "__main__":
-    design_opt_rpm(22000)
-    # change_prop_area(27)
-
+    # change_prop_area(24)
+    # design_opt_rpm(h=20000, plot=True, traj=True)
+    change_air_data(20000)
+    design_prop(950, "best_prop")
+    plot_prop('best_prop')
     # print(-design_prop(1200, "test_prop"))
-    # plot_prop('test_prop')
+
 
     # rpms = np.arange(600.0, 2500.0, 100.0)
     # etas = np.zeros(len(rpms))

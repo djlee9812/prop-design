@@ -9,10 +9,7 @@ from scipy.optimize import minimize_scalar
 from air_data import change_air_data
 from qmil_design import design_opt_rpm, change_prop_area
 
-prop = "best_prop"
-motor = "est_motor"
-
-def run_qprop(vel, rpm):
+def run_qprop(vel, rpm, prop="best_prop", motor="est_motor"):
     """
     Function to run qprop for optimizer model data collection
     """
@@ -41,7 +38,7 @@ def run_qprop(vel, rpm):
         data = np.zeros(19)
     return data
 
-def get_nums(dBeta, vel, thrust):
+def get_nums(dBeta, vel, thrust, prop="best_prop", motor="est_motor"):
     dBeta = str(dBeta)
     vel = str(vel)
     thrust = str(thrust)
@@ -68,29 +65,32 @@ def get_nums(dBeta, vel, thrust):
         data = np.zeros(19)
     return data
 
-def get_eff(dBeta, vel, thrust):
+def get_eff(dBeta, vel, thrust, prop="best_prop", motor="est_motor"):
     """
     Get negative of efficiency given an rpm and velocity
     """
     # Grab efficiency
-    return -get_nums(dBeta, vel, thrust)[9]
+    data = get_nums(dBeta, vel, thrust, prop, motor)
+    eff_prop = -data[9]
+    eff_tot = -data[14]
+    return eff_tot
 
-def opt_dbeta(vel, thrust):
+def opt_dbeta(vel, thrust, prop="best_prop", motor="est_motor"):
     """
     Optimize for efficiency on variable pitch given an airspeed and required
     thrust.
     """
     res = minimize_scalar(get_eff, method='brent',
-                          args=(vel, thrust), options={'xtol': 1e-1})
-    # res = minimize_scalar(get_eff, bounds=(-30,30), method='bounded',
-    #                       args=(vel, thrust), options={'xatol': 1e-2})
+                          args=(vel, thrust, prop, motor), options={'xtol': 1e-1})
+    # res = minimize_scalar(get_eff, bounds=(3.5,30), method='bounded',
+    #                       args=(vel, thrust, prop, motor), options={'xatol': 1e-2})
     if res.success:
         # print(-res.fun, res.x, res.nfev)
         return res
     else:
         print("Unsuccessful optimization", res.x, res.fun)
 
-def opt_sweep():
+def opt_sweep(prop="best_prop", motor="est_motor"):
     # make performance plot thrust vs v vs eta
     vels = np.arange(20, 64, 4)
     thrusts = np.arange(5, 120, 5)
@@ -110,7 +110,7 @@ def opt_sweep():
             for k, vel in enumerate(vels):
                 for l, thrust in enumerate(thrusts):
                     for m, dbeta in enumerate(dbetas):
-                        data = get_nums(dbeta, vel, thrust)
+                        data = get_nums(dbeta, vel, thrust, prop, motor)
                         Pshaft = data[5]
                         eff = data[9]
                         effs[i,j,k,l,m] = eff
@@ -122,13 +122,18 @@ def opt_sweep():
 
 
 if __name__ == "__main__":
-    opt_sweep()
+    prop = "best_prop"
+    motor = "est_motor"
+    # opt_sweep(prop, motor)
 
+    data = get_nums(0, 10, 38)
+    print(data)
     # Effect of variable pitch
-    # pitches = np.linspace(-30, 30, 50)
+    # change_air_data(0)
+    # pitches = np.linspace(-15, 20, 50)
     # effs_p = np.zeros(len(pitches))
     # for i, p in enumerate(pitches):
-    #     effs_p[i] = -get_eff(p, 40, 800)
+    #     effs_p[i] = -get_eff(p, 10, 38)
     # plt.plot(pitches, effs_p)
     # plt.show()
 

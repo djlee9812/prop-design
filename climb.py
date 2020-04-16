@@ -43,16 +43,16 @@ def follow_trajectory(ts, hs, vs, thrusts, npt=60, optimize=True, show=False,
     """
     step = len(ts) // npt if npt <= len(ts) else 1
     result = []
-    last_h = 0
+    last_h = -100
     # Iterate through time steps
     for i, t in enumerate(ts[::step]):
         i *= step
         h, v, thrust = (hs[i], vs[i], thrusts[i])
         p = thrust * v
         # If alt change > 100m, recalculate air data
-        if abs(h-last_h) > 100:
-            change_air_data(h)
-            last_h = h
+        # if abs(h-last_h) > 100:
+        change_air_data(h)
+        last_h = h
         if optimize:
             opt = opt_dbeta(v, thrust, prop=prop)
             dbeta = opt.x
@@ -65,7 +65,8 @@ def follow_trajectory(ts, hs, vs, thrusts, npt=60, optimize=True, show=False,
         Pshaft = data[5]
         eta = data[9]
         J = data[10]
-        result.append([t, h, v, p, thrust, rpm, Q, Pshaft, J, dbeta, eta])
+        eta_tot = data[14]
+        result.append([t, h, v, p, thrust, rpm, Q, Pshaft, J, dbeta, eta, eta_tot])
     result = np.array(result)
     # print("Average Efficiency:", np.mean(result[:,10]))
     if show:
@@ -80,7 +81,7 @@ def follow_trajectory(ts, hs, vs, thrusts, npt=60, optimize=True, show=False,
         plt.xlabel("time [hr]")
         plt.show()
     if save:
-        savefile = "cycle" if optimize else "cycle_unopt"
+        savefile = "climb" if optimize else "climb_unopt"
         np.savez(savefile, res=result)
     return np.mean(result[:,10])
 
@@ -94,46 +95,52 @@ def plot_trajectory(data_file="cycle.npz"):
         Name/Address of file containing plot data (from follow_trajectory())
     """
     result = np.load(data_file)["res"].T
-    t, h, v, p, thrust, rpm, Q, Pshaft, J, dbeta, eta = result
+    t, h, v, p, thrust, rpm, Q, Pshaft, J, dbeta, eta, eta_tot = result
     night = int( len(t) * 7.5 // 24 )
     day = len(t) * 18 // 24
     res_day = np.concatenate((result[:,:night], result[:,day:]), axis=1)
     res_night = result[:,night:day]
-    t_d, h_d, v_d, p_d, thrust_d, rpm_d, Q_d, Pshaft_d, J_d, dbeta_d, eta_d = res_day
-    t_n, h_n, v_n, p_n, thrust_n, rpm_n, Q_n, Pshaft_n, J_n, dbeta_n, eta_n = res_night
+    t_d, h_d, v_d, p_d, thrust_d, rpm_d, Q_d, Pshaft_d, J_d, dbeta_d, eta_d, eta_tot_d = res_day
+    t_n, h_n, v_n, p_n, thrust_n, rpm_n, Q_n, Pshaft_n, J_n, dbeta_n, eta_n, eta_tot_n = res_night
 
     fig = plt.figure(figsize=(7,7.5))
     ax1 = plt.subplot(311)
     ax1.set_title("24 Hour Cycle for each Propeller")
-    ax1.plot(t_d, h_d/304.88, ".-", label="Day", color="cornflowerblue")
-    ax1.plot(t_n, h_n/304.88, ".-", label="Night", color="midnightblue")
+    # ax1.plot(t_d, h_d/304.88, ".-", label="Day", color="cornflowerblue")
+    # ax1.plot(t_n, h_n/304.88, ".-", label="Night", color="midnightblue")
+    ax1.plot(t, h/304.88, ".-", color="cornflowerblue")
     ax1.set_ylabel('Altitude [kft]', color="midnightblue")
     ax12 = ax1.twinx()
-    ax12.plot(t_d, rpm_d, ".-", label="Day", color="indianred")
-    ax12.plot(t_n, rpm_n, ".-", label="Night", color="maroon")
+    # ax12.plot(t_d, rpm_d, ".-", label="Day", color="indianred")
+    # ax12.plot(t_n, rpm_n, ".-", label="Night", color="maroon")
+    ax12.plot(t, rpm, ".-", color="indianred")
     ax12.set_ylabel("RPM", color="maroon")
     ax12.grid(None)
     # ax12.set_yticks(np.linspace(ax12.get_yticks()[0], ax12.get_yticks()[-1], len(ax1.get_yticks())))
 
     ax2 = plt.subplot(312)
-    ax2.plot(t_d, thrust_d, ".-", label="Day", color="cornflowerblue")
-    ax2.plot(t_n, thrust_n, ".-", label="Night", color="midnightblue")
+    # ax2.plot(t_d, thrust_d, ".-", label="Day", color="cornflowerblue")
+    # ax2.plot(t_n, thrust_n, ".-", label="Night", color="midnightblue")
+    ax2.plot(t, thrust, ".-", color="cornflowerblue")
     ax2.set_ylabel('Thrust [N]', color="midnightblue")
     ax22 = ax2.twinx()
-    ax22.plot(t_d, eta_d, ".-", label="Day", color="indianred")
-    ax22.plot(t_n, eta_n, ".-", label="Night", color="maroon")
+    # ax22.plot(t_d, eta_d, ".-", label="Day", color="indianred")
+    # ax22.plot(t_n, eta_n, ".-", label="Night", color="maroon")
+    ax22.plot(t, eta, ".-", color="indianred")
     ax22.set_ylabel(r'$\eta$', color="maroon")
     ax22.grid(None)
 
     ax3 = plt.subplot(313)
     # plt.plot(t, dbeta)
     # plt.ylabel(r'$d\beta$')
-    ax3.plot(t_d, Pshaft_d, ".-", label="Day", color="cornflowerblue")
-    ax3.plot(t_n, Pshaft_n, ".-", label="Night", color="midnightblue")
+    # ax3.plot(t_d, Pshaft_d, ".-", label="Day", color="cornflowerblue")
+    # ax3.plot(t_n, Pshaft_n, ".-", label="Night", color="midnightblue")
+    ax3.plot(t, Pshaft, ".-", color="cornflowerblue")
     ax3.set_ylabel('Shaft Power [W]', color="midnightblue")
     ax32 = ax3.twinx()
-    ax32.plot(t_d, Q_d, ".-", label="Day", color="indianred")
-    ax32.plot(t_n, Q_n, ".-", label="Night", color="maroon")
+    # ax32.plot(t_d, Q_d, ".-", label="Day", color="indianred")
+    # ax32.plot(t_n, Q_n, ".-", label="Night", color="maroon")
+    ax32.plot(t, Q, ".-", color="indianred")
     ax32.set_ylabel('Required Torque [Nm]', color="maroon")
     ax3.set_xlabel("Time from Solar Noon [hr]")
     ax32.grid(None)
@@ -196,13 +203,12 @@ def rpm_trade(rpms, ts, hs, vs, thrusts, optimize):
 
 if __name__ == "__main__":
     num_motor = 6
-    data =  np.load('time_altitude_airspeed.npz')
-    ts = data['t']/3600
-    hs = data['h']
-    vs = data['v']
-    thrusts = data['thrust']/num_motor
-    # plt.plot(ts, hs)
-    # plt.show()
+    data =  np.load('climb_path.npz')
+    ts = data['t'][:55]/3600
+    hs = data['h'][:55]
+    vs = data['v'][:55]
+    thrusts = data['thrust'][:55]/num_motor
+
     # plot_motor_eff(20*np.pi/30, 0.2, .5)
     # Kvs = np.linspace(3, 10, 10)
     # I0s = np.linspace(1, 5, 15)
@@ -233,13 +239,13 @@ if __name__ == "__main__":
     # plt.show()
 
     # start = time.time()
-    # eff_opt = follow_trajectory(ts, hs, vs, thrusts, npt=200, optimize=True)
-    # print("Average Efficiency:", eff_opt)
-    # plot_trajectory("cycle.npz")
+    eff_opt = follow_trajectory(ts, hs, vs, thrusts, npt=200, optimize=True)
+    print("Average Efficiency:", eff_opt)
+    plot_trajectory("climb.npz")
     # print(time.time() - start)
-    # eff_unopt = follow_trajectory(ts, hs, vs, thrusts, npt=200, optimize=False)
-    # print("Average Efficiency:", eff_unopt)
-    # plot_trajectory("cycle_unopt.npz")
+    eff_unopt = follow_trajectory(ts, hs, vs, thrusts, npt=200, optimize=False)
+    print("Average Efficiency:", eff_unopt)
+    plot_trajectory("climb_unopt.npz")
     # print(time.time() - start)
 
 
