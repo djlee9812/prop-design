@@ -152,8 +152,13 @@ def plot_trajectory(data_file="cycle.npz"):
     plt.show()
 
 def plot_motor_eff(Kv, R, I0):
+    """
+    Calculate and plot motor efficiency over various torque and RPM ranges.
+    The RPM/Omega used in the calculations and Kv should be in units of
+    rad/s instead of rpm.
+    """
     Qs = np.linspace(5, 30, 50)
-    RPMs = np.linspace(400, 2000, 60)
+    RPMs = np.linspace(200, 2000, 60)*np.pi/30
     mot_effs = np.zeros((50, 60))
     for i, Q in enumerate(Qs):
         for j, RPM in enumerate(RPMs):
@@ -164,7 +169,7 @@ def plot_motor_eff(Kv, R, I0):
     # return np.mean(mot_effs)
     print(np.mean(mot_effs))
     plt.figure()
-    X, Y = np.meshgrid(RPMs, Qs)
+    X, Y = np.meshgrid(RPMs*30/np.pi, Qs)
     plt.contourf(X, Y, mot_effs)
     plt.xlabel("RPMs")
     plt.ylabel("Torques")
@@ -203,7 +208,8 @@ if __name__ == "__main__":
     thrusts = data['thrust']/num_motor
     # plt.plot(ts, hs)
     # plt.show()
-    # plot_motor_eff(20*np.pi/30, 0.2, .5)
+
+    # plot_motor_eff(8*np.pi/30, 1.1, 3.6)
     # Kvs = np.linspace(3, 10, 10)
     # I0s = np.linspace(1, 5, 15)
     # effs = np.zeros((10, 15))
@@ -233,9 +239,9 @@ if __name__ == "__main__":
     # plt.show()
 
     # start = time.time()
-    # eff_opt = follow_trajectory(ts, hs, vs, thrusts, npt=200, optimize=True)
-    # print("Average Efficiency:", eff_opt)
-    # plot_trajectory("cycle.npz")
+    eff_opt = follow_trajectory(ts, hs, vs, thrusts, npt=200, optimize=True)
+    print("Average Efficiency:", eff_opt)
+    plot_trajectory("cycle.npz")
     # print(time.time() - start)
     # eff_unopt = follow_trajectory(ts, hs, vs, thrusts, npt=200, optimize=False)
     # print("Average Efficiency:", eff_unopt)

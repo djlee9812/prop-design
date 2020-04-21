@@ -105,7 +105,7 @@ def plot_trajectory(data_file="cycle.npz"):
 
     fig = plt.figure(figsize=(7,7.5))
     ax1 = plt.subplot(311)
-    ax1.set_title("24 Hour Cycle for each Propeller")
+    ax1.set_title("Climb for each Propeller")
     # ax1.plot(t_d, h_d/304.88, ".-", label="Day", color="cornflowerblue")
     # ax1.plot(t_n, h_n/304.88, ".-", label="Night", color="midnightblue")
     ax1.plot(t, h/304.88, ".-", color="cornflowerblue")
@@ -142,7 +142,7 @@ def plot_trajectory(data_file="cycle.npz"):
     # ax32.plot(t_n, Q_n, ".-", label="Night", color="maroon")
     ax32.plot(t, Q, ".-", color="indianred")
     ax32.set_ylabel('Required Torque [Nm]', color="maroon")
-    ax3.set_xlabel("Time from Solar Noon [hr]")
+    ax3.set_xlabel("Time after Takeoff [hr]")
     ax32.grid(None)
 
     plt.figure()
@@ -158,49 +158,6 @@ def plot_trajectory(data_file="cycle.npz"):
     plt.title("Motor Torque Requirement vs RPM")
     plt.show()
 
-def plot_motor_eff(Kv, R, I0):
-    Qs = np.linspace(5, 30, 50)
-    RPMs = np.linspace(400, 2000, 60)
-    mot_effs = np.zeros((50, 60))
-    for i, Q in enumerate(Qs):
-        for j, RPM in enumerate(RPMs):
-            # I = Q*Kv + I0
-            # V = RPM * Kv + I*R
-            # mot_effs[i, j] = (1 - I*R/V) * (1 - I0/I)
-            mot_effs[i,j] = (Kv*RPM/(Kv*RPM+Q*R*Kv+I0*R))*(Q*Kv/(Q*Kv+I0))
-    # return np.mean(mot_effs)
-    print(np.mean(mot_effs))
-    plt.figure()
-    X, Y = np.meshgrid(RPMs, Qs)
-    plt.contourf(X, Y, mot_effs)
-    plt.xlabel("RPMs")
-    plt.ylabel("Torques")
-    plt.title("Motor Efficiencies over Operating Range")
-    plt.colorbar()
-    plt.show()
-
-
-def rpm_trade(rpms, ts, hs, vs, thrusts, optimize):
-    """
-    Trade study of design RPM vs average efficiency over cycle. Given a range
-    of rpms, redesign "test_prop" to be optimized at the given rpm and use
-    the output propeller to get average efficiency over cycle
-    """
-    effs = np.zeros(len(rpms))
-    for i, rpm in enumerate(rpms):
-        print("Design rpm:", rpm, "Design eff:", -design_prop(rpm, "test_prop"))
-        effs[i] = follow_trajectory(ts, hs, vs, thrusts, npt=200,
-                                    optimize=optimize, show=False,
-                                    prop="test_prop")
-    # plt.figure()
-    # plt.plot(rpms, effs)
-    # opt_title = "with Variable Pitch" if optimize else ""
-    # plt.title("Design RPM vs Average Efficiency " + opt_title)
-    # plt.xlabel("QMil Design RPM")
-    # plt.ylabel(r"Average $\eta$ over 24 Hour Cycle")
-    # plt.show()
-    return effs
-
 if __name__ == "__main__":
     num_motor = 6
     data =  np.load('climb_path.npz')
@@ -208,35 +165,6 @@ if __name__ == "__main__":
     hs = data['h'][:55]
     vs = data['v'][:55]
     thrusts = data['thrust'][:55]/num_motor
-
-    # plot_motor_eff(20*np.pi/30, 0.2, .5)
-    # Kvs = np.linspace(3, 10, 10)
-    # I0s = np.linspace(1, 5, 15)
-    # effs = np.zeros((10, 15))
-    # for i, Kv in enumerate(Kvs):
-    #     for j, I0 in enumerate(I0s):
-    #         effs[i,j] = plot_motor_eff(Kv*np.pi/30, 1.1, I0)
-    # plt.figure()
-    # X, Y = np.meshgrid(I0s, Kvs)
-    # plt.contourf(X, Y, effs)
-    # plt.title("Average Efficiencies for Various Motors")
-    # plt.xlabel(r"$I_0$")
-    # plt.ylabel("Kv")
-    # plt.colorbar()
-    # plt.show()
-
-    # rpms = np.arange(800, 1700, 50)
-    # opt_eff = rpm_trade(rpms, ts, hs, vs, thrusts, True)
-    # unopt_eff = rpm_trade(rpms, ts, hs, vs, thrusts, False)
-    # np.savez("rpm_trade.npz", opt_eff, unopt_eff)
-    # plt.figure()
-    # plt.plot(rpms, opt_eff, label="Variable Pitch")
-    # plt.plot(rpms, unopt_eff, label="Fixed Pitch")
-    # plt.title("Design RPM vs Average Efficiency")
-    # plt.xlabel("QMil Design RPM")
-    # plt.ylabel(r"Average $\eta$ over 24 Hour Cycle")
-    # plt.legend()
-    # plt.show()
 
     # start = time.time()
     eff_opt = follow_trajectory(ts, hs, vs, thrusts, npt=200, optimize=True)
@@ -247,19 +175,3 @@ if __name__ == "__main__":
     print("Average Efficiency:", eff_unopt)
     plot_trajectory("climb_unopt.npz")
     # print(time.time() - start)
-
-
-    # result = np.load("cycle.npz")["res"].T
-    # result2 = np.load("cycle_unopt.npz")["res"].T
-    # t, h, v, p, thrust, rpm, Q, Pshaft, J, dbeta, eta = result
-    # plt.figure()
-    # plt.plot(t, rpm, label="Variable Pitch")
-    # plt.ylabel('RPM')
-    # result = np.load("cycle_unopt.npz")["res"].T
-    # t, h, v, p, thrust, rpm, Q, Pshaft, J, dbeta, eta = result
-    # plt.plot(t, rpm, label="Fixed Pitch")
-    # plt.xlabel("Time [hr]")
-    # plt.title("RPM over cycle")
-    # plt.legend()
-    # plt.show()
-    #

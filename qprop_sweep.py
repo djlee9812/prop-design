@@ -72,8 +72,11 @@ def get_eff(dBeta, vel, thrust, prop="best_prop", motor="est_motor"):
     # Grab efficiency
     data = get_nums(dBeta, vel, thrust, prop, motor)
     eff_prop = -data[9]
-    eff_tot = -data[14]
-    return eff_tot
+    Pshaft = data[5]
+    motor_loss = np.tanh(3 * Pshaft/2000)
+    eff_tot = -data[14] * motor_loss
+    Pelec = data[15]
+    return eff_prop
 
 def opt_dbeta(vel, thrust, prop="best_prop", motor="est_motor"):
     """
