@@ -239,13 +239,13 @@ if __name__ == "__main__":
     # plt.show()
 
     # start = time.time()
-    eff_opt = follow_trajectory(ts, hs, vs, thrusts, npt=200, optimize=True)
-    print("Average Efficiency:", eff_opt)
-    plot_trajectory("cycle.npz")
+    # eff_opt = follow_trajectory(ts, hs, vs, thrusts, npt=200, optimize=True)
+    # print("Average Efficiency:", eff_opt)
+    # plot_trajectory("cycle.npz")
     # print(time.time() - start)
-    # eff_unopt = follow_trajectory(ts, hs, vs, thrusts, npt=200, optimize=False)
-    # print("Average Efficiency:", eff_unopt)
-    # plot_trajectory("cycle_unopt.npz")
+    eff_unopt = follow_trajectory(ts, hs, vs, thrusts, npt=200, optimize=False)
+    print("Average Efficiency:", eff_unopt)
+    plot_trajectory("cycle_unopt.npz")
     # print(time.time() - start)
 
 

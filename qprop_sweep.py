@@ -9,35 +9,6 @@ from scipy.optimize import minimize_scalar
 from air_data import change_air_data
 from qmil_design import design_opt_rpm, change_prop_area
 
-def run_qprop(vel, rpm, prop="best_prop", motor="est_motor"):
-    """
-    Function to run qprop for optimizer model data collection
-    """
-    vel = str(vel)
-    rpm = str(rpm)
-    # Run qprop in bash with velocity, rpm
-    cmd = ['qprop', prop, motor, vel, rpm]
-    process = subprocess.Popen(cmd, stdout=subprocess.PIPE)
-    output = process.communicate()[0]
-    # Grab efficiency (18th line)
-    line = str(output.splitlines()[17])
-    nums = re.findall("(\d+\.)(\d+)?(E[+-]\d+)?", line)
-    data = []
-    for n in nums:
-        try:
-            data.append(float(''.join(n)))
-        except:
-            print("can't cast to float", n)
-    try:
-        effp = data[9]
-        # Sanity check on efficiency
-        if not (0.01 < effp < 0.99):
-            data = np.zeros(19)
-    # If error, condition likely invalid
-    except:
-        data = np.zeros(19)
-    return data
-
 def get_nums(dBeta, vel, thrust, prop="best_prop", motor="est_motor"):
     dBeta = str(dBeta)
     vel = str(vel)
