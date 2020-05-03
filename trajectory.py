@@ -102,6 +102,9 @@ def plot_trajectory(data_file="cycle.npz"):
     t_d, h_d, v_d, p_d, thrust_d, rpm_d, Q_d, Pshaft_d, J_d, dbeta_d, eta_d = res_day
     t_n, h_n, v_n, p_n, thrust_n, rpm_n, Q_n, Pshaft_n, J_n, dbeta_n, eta_n = res_night
 
+    print("Avg RPM", rpm_n[0], "PShaft", Pshaft_n[0], "Q", Q_n[0])
+    print("Max RPM", max(rpm_d), "PShaft", max(Pshaft_d), "Q", max(Q_d))
+
     fig = plt.figure(figsize=(7,7.5))
     ax1 = plt.subplot(311)
     ax1.set_title("24 Hour Cycle for each Propeller")
@@ -149,7 +152,7 @@ def plot_trajectory(data_file="cycle.npz"):
     plt.xlabel("RPM")
     plt.ylabel("Torque Requirement [N/m]")
     plt.title("Motor Torque Requirement vs RPM")
-    plt.show()
+    # plt.show()
 
 def plot_motor_eff(Kv, R, I0):
     """
@@ -157,8 +160,8 @@ def plot_motor_eff(Kv, R, I0):
     The RPM/Omega used in the calculations and Kv should be in units of
     rad/s instead of rpm.
     """
-    Qs = np.linspace(5, 30, 50)
-    RPMs = np.linspace(200, 2000, 60)*np.pi/30
+    Qs = np.linspace(5, 15, 50)
+    RPMs = np.linspace(200, 1800, 60)*np.pi/30
     mot_effs = np.zeros((50, 60))
     for i, Q in enumerate(Qs):
         for j, RPM in enumerate(RPMs):
@@ -200,7 +203,7 @@ def rpm_trade(rpms, ts, hs, vs, thrusts, optimize):
     return effs
 
 if __name__ == "__main__":
-    num_motor = 6
+    num_motor = 4
     data =  np.load('time_altitude_airspeed.npz')
     ts = data['t']/3600
     hs = data['h']
@@ -209,7 +212,7 @@ if __name__ == "__main__":
     # plt.plot(ts, hs)
     # plt.show()
 
-    # plot_motor_eff(8*np.pi/30, 1.1, 3.6)
+    # plot_motor_eff(8*np.pi/30, 0.3, 1.1)
     # Kvs = np.linspace(3, 10, 10)
     # I0s = np.linspace(1, 5, 15)
     # effs = np.zeros((10, 15))
@@ -240,12 +243,13 @@ if __name__ == "__main__":
 
     # start = time.time()
     # eff_opt = follow_trajectory(ts, hs, vs, thrusts, npt=200, optimize=True)
-    # print("Average Efficiency:", eff_opt)
+    # print("Average Efficiency Var Pitch:", eff_opt)
     # plot_trajectory("cycle.npz")
     # print(time.time() - start)
     eff_unopt = follow_trajectory(ts, hs, vs, thrusts, npt=200, optimize=False)
-    print("Average Efficiency:", eff_unopt)
+    print("Average Efficiency Fixed Pitch:", eff_unopt)
     plot_trajectory("cycle_unopt.npz")
+    plt.show()
     # print(time.time() - start)
 
 

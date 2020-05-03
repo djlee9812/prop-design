@@ -6,20 +6,20 @@ Template prop lrp01.dat M0.3
    0.3800  6.2832    ! CL0    CL_a
   -0.4000  1.2900    ! CLmin  CLmax
 
-   0.01140   0.034  0.024  0.5226 ! CD0    CD2u   CD2l  CLCD0
+   0.0114   0.034  0.090  0.5226 ! CD0    CD2u   CD2l  CLCD0
    100000.0 -0.500               ! REref  REexp
 
 
    0.0  0.1  0.2  0.5  1.0   ! XIdes   (r/R locations where design cl is specified)
-   0.7  0.64 0.60 0.47 0.32  ! CLdes   (specified cl)
+   0.84 0.80 0.64 0.59 0.55  ! CLdes   (specified cl)
 
-  0.15    !  hub radius(m)
-  1.206   ! tip radius(m)
-  35.0    !  speed(m/s)
+  0.10    !  hub radius(m)
+  1.08   ! tip radius(m)
+  32.0    !  speed(m/s)
   800.0   !  rpm
 
-  0.0      !  Thrust(N)   ( 0 if power  specified )
-    1333.0 !  Power(W)    ( 0 if thrust specified )
+  27.0     !  Thrust(N)   ( 0 if power  specified )
+       0.0 !  Power(W)    ( 0 if thrust specified )
 
  0    0.0   ! Ldes   [ KQdes ]
    30       !  Nout     number of output stations (optional)

@@ -2,6 +2,6 @@ Estimated Motor Model
 
  1     ! motor type (brushed DC)
 
- 1.1      ! Rmotor (Ohms)
- 3.6      ! Io     (Amps)
- 8.0      ! Kv     (rpm/Volt)
+ 0.3      ! Rmotor (Ohms)
+ 1.1      ! Io     (Amps)
+ 4.0      ! Kv     (rpm/Volt)

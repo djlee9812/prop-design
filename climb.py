@@ -100,8 +100,8 @@ def plot_trajectory(data_file="cycle.npz"):
     day = len(t) * 18 // 24
     res_day = np.concatenate((result[:,:night], result[:,day:]), axis=1)
     res_night = result[:,night:day]
-    t_d, h_d, v_d, p_d, thrust_d, rpm_d, Q_d, Pshaft_d, J_d, dbeta_d, eta_d, eta_tot_d = res_day
-    t_n, h_n, v_n, p_n, thrust_n, rpm_n, Q_n, Pshaft_n, J_n, dbeta_n, eta_n, eta_tot_n = res_night
+    print("Avg RPM", np.mean(rpm), "PShaft", np.mean(Pshaft), "Q", np.mean(Q))
+    print("Max RPM", max(rpm), "PShaft", max(Pshaft), "Q", max(Q))
 
     fig = plt.figure(figsize=(7,7.5))
     ax1 = plt.subplot(311)
@@ -159,19 +159,19 @@ def plot_trajectory(data_file="cycle.npz"):
     plt.show()
 
 if __name__ == "__main__":
-    num_motor = 6
+    num_motor = 4
     data =  np.load('climb_path.npz')
-    ts = data['t'][:55]/3600
-    hs = data['h'][:55]
-    vs = data['v'][:55]
-    thrusts = data['thrust'][:55]/num_motor
+    ts = data['t'][:41]/3600
+    hs = data['h'][:41]
+    vs = data['v'][:41]
+    thrusts = data['thrust'][:41]/num_motor
 
     # start = time.time()
-    eff_opt = follow_trajectory(ts, hs, vs, thrusts, npt=200, optimize=True)
-    print("Average Efficiency:", eff_opt)
-    plot_trajectory("climb.npz")
+    # eff_opt = follow_trajectory(ts, hs, vs, thrusts, npt=200, optimize=True)
+    # print("Var Pitch Average Efficiency:", eff_opt)
+    # plot_trajectory("climb.npz")
     # print(time.time() - start)
     eff_unopt = follow_trajectory(ts, hs, vs, thrusts, npt=200, optimize=False)
-    print("Average Efficiency:", eff_unopt)
+    print("Fixed Pitch Average Efficiency:", eff_unopt)
     plot_trajectory("climb_unopt.npz")
     # print(time.time() - start)
