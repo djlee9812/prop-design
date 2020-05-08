@@ -155,16 +155,17 @@ def plot_trajectory(data_file="cycle.npz"):
     plt.plot(rpm, Q, ".-")
     plt.xlabel("RPM")
     plt.ylabel("Torque Requirement [N/m]")
-    plt.title("Motor Torque Requirement vs RPM")
+    plt.title("Motor Torque Requirement vs RPM for Ascent")
+    plt.tight_layout()
     plt.show()
 
 if __name__ == "__main__":
     num_motor = 4
     data =  np.load('climb_path.npz')
-    ts = data['t'][:41]/3600
-    hs = data['h'][:41]
-    vs = data['v'][:41]
-    thrusts = data['thrust'][:41]/num_motor
+    ts = data['t'][:81]/3600
+    hs = data['h'][:81]
+    vs = data['v'][:81]
+    thrusts = data['thrust'][:81]/num_motor
 
     # start = time.time()
     # eff_opt = follow_trajectory(ts, hs, vs, thrusts, npt=200, optimize=True)

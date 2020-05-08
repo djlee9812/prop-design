@@ -50,9 +50,9 @@ def follow_trajectory(ts, hs, vs, thrusts, npt=60, optimize=True, show=False,
         h, v, thrust = (hs[i], vs[i], thrusts[i])
         p = thrust * v
         # If alt change > 100m, recalculate air data
-        if abs(h-last_h) > 100:
-            change_air_data(h)
-            last_h = h
+        # if abs(h-last_h) > 10:
+        change_air_data(h)
+            # last_h = h
         if optimize:
             opt = opt_dbeta(v, thrust, prop=prop)
             dbeta = opt.x

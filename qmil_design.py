@@ -91,12 +91,12 @@ def plot_prop(propfile):
     plt.plot(r,c,'b')
     plt.axhline(y=np.mean(c), linestyle=":", color="gray")
     plt.annotate("Average c/R", xy=(0.9,np.mean(c)+.01))
-    plt.ylabel("c/R")
-    plt.title(r"Propeller Chord and $\beta$, R = " + str(R) + "m")
+    plt.ylabel("c/R", fontsize="16")
+    plt.title(r"Propeller Chord and $\beta$, R = " + str(R) + "m", fontsize="18")
     plt.subplot(212)
     plt.plot(r, beta, 'b', label = "QMIL")
-    plt.ylabel(r"$\beta$")
-    plt.xlabel('r/R')
+    plt.ylabel(r"$\beta$", fontsize="16")
+    plt.xlabel('r/R', fontsize="16")
 
     radius = HUB_R / R
     hub_x = np.arange(0, radius, 0.002)
@@ -114,9 +114,9 @@ def plot_prop(propfile):
     # circle = plt.Circle((0, 0), 0.15, color='r')
     plt.xlim(0, 1)
     plt.ylim(-0.5, 0.5)
-    plt.title("Propeller, R = " + str(R) + "m")
-    plt.ylabel("x/R")
-    plt.xlabel('y/R')
+    plt.title("Propeller, R = " + str(R) + "m", fontsize="18")
+    plt.ylabel("x/R", fontsize="16")
+    plt.xlabel('y/R', fontsize="16")
     plt.gca().set_aspect('equal', adjustable='box')
     plt.legend()
     # ax.add_artist(circle)
@@ -124,10 +124,10 @@ def plot_prop(propfile):
 
 def plot_blade_cl():
     plt.figure()
-    plt.plot([0, 0.1, 0.2, 0.5, 1.0], [0.84, 0.80, 0.62, 0.59, 0.55])
-    plt.xlabel("r/R")
-    plt.ylabel("Blade cl")
-    plt.title("Prop Blade cl Distribution")
+    plt.plot([0, 0.1, 0.2, 0.5, 1.0], [0.84, 0.80, 0.64, 0.59, 0.55])
+    plt.xlabel("r/R", fontsize="16")
+    plt.ylabel("Blade cl", fontsize="16")
+    plt.title("Prop Blade cl Distribution", fontsize="18")
     plt.show()
 
 def design_opt_rpm(h=21000, plot=False, traj=False, opt=False):
@@ -149,11 +149,11 @@ def design_opt_rpm(h=21000, plot=False, traj=False, opt=False):
 
 if __name__ == "__main__":
     # change_prop_area(24)
-    design_opt_rpm(h=19800, plot=True, traj=True, opt=False)
+    # design_opt_rpm(h=19800, plot=True, traj=True, opt=False)
     # change_air_data(20000)
     # design_prop(1100, "best_prop")
-    # plot_prop('best_prop')
-    plot_blade_cl()
+    plot_prop('best_prop')
+    # plot_blade_cl()
     # print(-design_prop(1200, "test_prop"))
 
 
