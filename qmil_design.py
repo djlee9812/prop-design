@@ -73,6 +73,10 @@ def change_prop_area(area):
     design_opt_rpm()
 
 def plot_prop(propfile):
+    """
+    Plot the propeller r/c and beta/c distribution and the actual geometry
+    :params propfile: Filename or path to file containing propeller geometry
+    """
     f = open(propfile, "r")
     contents = f.readlines()
     prop_geom =  contents[-32:]
@@ -156,7 +160,7 @@ if __name__ == "__main__":
     # plot_blade_cl()
     # print(-design_prop(1200, "test_prop"))
 
-
+    # Sensitivity study to design RPM
     # rpms = np.arange(600.0, 2500.0, 100.0)
     # etas = np.zeros(len(rpms))
     #

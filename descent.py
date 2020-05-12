@@ -41,6 +41,9 @@ def run_qprop(vel, dbeta=0, prop="best_prop", motor="est_motor"):
     return data, cl, cd
 
 def windmill(alt_min, alt_max, dbeta):
+    """
+    Calculate windmill drag at specified dbeta between alt_min and alt_max
+    """
     q = 45
     num_alts = 50
     alts = np.linspace(alt_min, alt_max, num_alts)
@@ -64,6 +67,13 @@ def plot_descent(result):
     plt.show()
 
 def descend():
+    """
+    Function to calculate descent trajectory. Descent at .85 divergence speed.
+    Recalculates CL then scales CD for new induced drag and prop windmill drag
+    is added. The descent angle is calculated and the speed is integrated
+    using Euler method at 5 minute intervals and stores data in results.
+    Plots descent trajectory
+    """
     W = 390
     g = 9.81
     V_div = 13.3 # Divergence speed at sea level
@@ -79,7 +89,7 @@ def descend():
     CD0 = CL_cruise / LD_cruise - CL_cruise**2 / (np.pi * AR * e) # 0.0152
     CD = CD0 + CL ** 2 / (np.pi * AR * e) # Descent CD with less induced drag
     drag_vehicle = CD * q * S
-    dt = 5 * 60 # 30 minutes [sec]
+    dt = 5 * 60 # 5 minutes [sec]
 
     alt, x, t = (19800, 0, 0)
     result = []
